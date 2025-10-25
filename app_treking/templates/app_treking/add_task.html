@@ -2,8 +2,8 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2>Add New Task</h2>
-    <form method="post">
+    <h2>{% if edit_mode %}Edit Task{% else %}Add New Task{% endif %}</h2>
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="card">
             <div class="card-body">
@@ -12,10 +12,25 @@
                 
                 <h5 class="card-title mt-4">Task Details</h5>
                 {{ detail_form.as_p }}
+
+                <h5 class="card-title mt-4">Attachments</h5>
+                <div class="mb-3">
+                    <input type="file" name="attachments" class="form-control" multiple>
+                </div>
                 
-                <button type="submit" class="btn btn-primary mt-3">Add Task</button>
+                <button type="submit" class="btn btn-primary mt-3">{% if edit_mode %}Update Task{% else %}Add Task{% endif %}</button>
             </div>
         </div>
     </form>
+    {% if edit_mode and task.attachments.exists %}
+    <div class="mt-3">
+        <h5>Existing attachments</h5>
+        <ul>
+            {% for a in task.attachments.all %}
+            <li><a href="{{ a.file.url }}">{{ a.file.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

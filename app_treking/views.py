@@ -2,7 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.contrib import messages
-from .models import Task, TaskDetail, TaskComment
+from django.http import HttpResponseForbidden
+from django.urls import reverse
+from .models import Task, TaskDetail, TaskComment, TaskAttachment
 from .forms import TaskForm, TaskDetailForm, UserRegistrationForm, CommentForm
 
 def register(request):
@@ -98,6 +100,7 @@ def add_task(request):
     if request.method == 'POST':
         task_form = TaskForm(request.POST)
         detail_form = TaskDetailForm(request.POST)
+        files = request.FILES.getlist('attachments')
         
         if task_form.is_valid() and detail_form.is_valid():
             task = task_form.save(commit=False)
@@ -108,6 +111,11 @@ def add_task(request):
             task_detail.task = task
             task_detail.save()
             
+            # handle attachments
+            for f in files:
+                TaskAttachment.objects.create(task=task, file=f)
+            
+            messages.success(request, 'Task created successfully.')
             return redirect('task_list')
     else:
         task_form = TaskForm()
@@ -117,3 +125,70 @@ def add_task(request):
         'task_form': task_form,
         'detail_form': detail_form
     })
+
+
+@login_required
+def edit_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    if task.user != request.user and not request.user.is_staff:
+        return HttpResponseForbidden('You do not have permission to edit this task')
+
+    try:
+        task_detail = task.details
+    except TaskDetail.DoesNotExist:
+        task_detail = None
+
+    if request.method == 'POST':
+        task_form = TaskForm(request.POST, instance=task)
+        detail_form = TaskDetailForm(request.POST, instance=task_detail)
+        files = request.FILES.getlist('attachments')
+        if task_form.is_valid() and detail_form.is_valid():
+            task = task_form.save()
+            task_detail = detail_form.save(commit=False)
+            task_detail.task = task
+            task_detail.save()
+            for f in files:
+                TaskAttachment.objects.create(task=task, file=f)
+            messages.success(request, 'Task updated successfully.')
+            return redirect('task_detail', task_id=task.id)
+    else:
+        task_form = TaskForm(instance=task)
+        detail_form = TaskDetailForm(instance=task_detail)
+
+    return render(request, 'app_treking/add_task.html', {
+        'task_form': task_form,
+        'detail_form': detail_form,
+        'edit_mode': True,
+        'task': task,
+    })
+
+
+@login_required
+def delete_task(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    if task.user != request.user and not request.user.is_staff:
+        return HttpResponseForbidden('You do not have permission to delete this task')
+
+    if request.method == 'POST':
+        task.delete()
+        messages.success(request, 'Task deleted')
+        return redirect('task_list')
+
+    return render(request, 'app_treking/confirm_delete.html', {'task': task})
+
+
+@login_required
+def mark_task_done(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    if task.user != request.user and not request.user.is_staff:
+        return HttpResponseForbidden('You do not have permission')
+
+    try:
+        task_detail = task.details
+    except TaskDetail.DoesNotExist:
+        task_detail = TaskDetail.objects.create(task=task)
+
+    task_detail.status = 'done'
+    task_detail.save()
+    messages.success(request, 'Task marked as done')
+    return redirect('task_detail', task_id=task.id)
