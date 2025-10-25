@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% load task_filters %}
+
+{% block content %}
+<!-- Dashboard Header -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="display-4 mb-0">
+            <i class="fas fa-clipboard-list me-2"></i>My Tasks
+        </h2>
+        <p class="text-muted">Manage and track your tasks efficiently</p>
+    </div>
+    <div class="col-md-4 text-end d-flex align-items-center justify-content-end">
+        <a href="{% url 'add_task' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-plus-circle me-2"></i>Add New Task
+        </a>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-tasks me-2"></i>Total Tasks
+                </h6>
+                <h2 class="display-4 mb-0">{{ total_tasks }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-check-circle me-2"></i>Completed
+                </h6>
+                <h2 class="display-4 mb-0">{{ completed_tasks }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-clock me-2"></i>Pending
+                </h6>
+                <h2 class="display-4 mb-0">{{ pending_tasks }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <h6 class="card-title">
+                    <i class="fas fa-chart-line me-2"></i>Completion Rate
+                </h6>
+                <h2 class="display-4 mb-0">{{ completion_rate|floatformat:1 }}%</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filters -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" name="search" class="form-control" placeholder="Search tasks..." 
+                                   value="{{ search_query }}">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="status" class="form-select">
+                            <option value="">All Statuses</option>
+                            <option value="todo" {% if status_filter == 'todo' %}selected{% endif %}>To Do</option>
+                            <option value="inprogress" {% if status_filter == 'inprogress' %}selected{% endif %}>In Progress</option>
+                            <option value="done" {% if status_filter == 'done' %}selected{% endif %}>Done</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <select name="priority" class="form-select">
+                            <option value="">All Priorities</option>
+                            <option value="high" {% if priority_filter == 'high' %}selected{% endif %}>High</option>
+                            <option value="medium" {% if priority_filter == 'medium' %}selected{% endif %}>Medium</option>
+                            <option value="low" {% if priority_filter == 'low' %}selected{% endif %}>Low</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter me-2"></i>Apply Filters
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Status Distribution -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-chart-pie me-2"></i>Tasks by Status
+                </h5>
+                <div class="progress" style="height: 25px;">
+                    {% for status in tasks_by_status %}
+                    {% if status.details__status == 'todo' %}
+                    <div class="progress-bar bg-warning" role="progressbar" 
+                         style="width: {{ status.count|percentage:total_tasks }}%">
+                        To Do ({{ status.count }})
+                    </div>
+                    {% elif status.details__status == 'inprogress' %}
+                    <div class="progress-bar bg-info" role="progressbar" 
+                         style="width: {{ status.count|percentage:total_tasks }}%">
+                        In Progress ({{ status.count }})
+                    </div>
+                    {% elif status.details__status == 'done' %}
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: {{ status.count|percentage:total_tasks }}%">
+                        Done ({{ status.count }})
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-flag me-2"></i>Tasks by Priority
+                </h5>
+                <div class="progress" style="height: 25px;">
+                    {% for priority in tasks_by_priority %}
+                    {% if priority.details__priority == 'high' %}
+                    <div class="progress-bar bg-danger" role="progressbar" 
+                         style="width: {{ priority.count|percentage:total_tasks }}%">
+                        High ({{ priority.count }})
+                    </div>
+                    {% elif priority.details__priority == 'medium' %}
+                    <div class="progress-bar bg-warning" role="progressbar" 
+                         style="width: {{ priority.count|percentage:total_tasks }}%">
+                        Medium ({{ priority.count }})
+                    </div>
+                    {% elif priority.details__priority == 'low' %}
+                    <div class="progress-bar bg-success" role="progressbar" 
+                         style="width: {{ priority.count|percentage:total_tasks }}%">
+                        Low ({{ priority.count }})
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    {% for task in tasks %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="card-title mb-0">
+                        <a href="{% url 'task_detail' task.id %}" class="text-decoration-none text-dark">
+                            {{ task.title }}
+                        </a>
+                    </h5>
+                </div>
+                
+                <p class="card-text text-muted">{{ task.description|truncatewords:30 }}</p>
+                
+                {% if task.details %}
+                <div class="task-meta mt-3">
+                    <div class="mb-2">
+                        <span class="badge bg-{{ task.details.status }} me-2">
+                            <i class="fas fa-clock me-1"></i>
+                            {{ task.details.get_status_display }}
+                        </span>
+                        <span class="badge bg-{{ task.details.priority }}">
+                            <i class="fas fa-flag me-1"></i>
+                            {{ task.details.get_priority_display }}
+                        </span>
+                    </div>
+                    {% if task.details.due_date %}
+                    <div class="mt-2">
+                        <i class="far fa-calendar-alt me-1"></i>
+                        <small class="text-muted">Due: {{ task.details.due_date|date:"F j, Y" }}</small>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-transparent">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <i class="far fa-clock me-1"></i>
+                        Created {{ task.created_at|timesince }} ago
+                    </small>
+                    <a href="{% url 'task_detail' task.id %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-eye me-1"></i>View
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <div class="empty-state">
+            <i class="fas fa-tasks fa-4x mb-3 text-muted"></i>
+            <h3>No Tasks Yet</h3>
+            <p class="text-muted">Start by adding your first task!</p>
+            <a href="{% url 'add_task' %}" class="btn btn-primary btn-lg mt-3">
+                <i class="fas fa-plus-circle me-2"></i>Add Your First Task
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
