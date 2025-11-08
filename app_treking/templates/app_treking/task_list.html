@@ -55,7 +55,13 @@
                 <h6 class="card-title">
                     <i class="fas fa-chart-line me-2"></i>Completion Rate
                 </h6>
+                {% if total_tasks == 0 %}
+                <h2 class="display-4 mb-0">—</h2>
+                {% elif completion_rate|floatformat:0 == '100' %}
+                <h2 class="display-4 mb-0">All done</h2>
+                {% else %}
                 <h2 class="display-4 mb-0">{{ completion_rate|floatformat:1 }}%</h2>
+                {% endif %}
             </div>
         </div>
     </div>

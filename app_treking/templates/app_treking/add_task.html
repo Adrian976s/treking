@@ -1,24 +1,32 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'app_treking/css/add_task.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-4 add-task-container">
     <h2>{% if edit_mode %}Edit Task{% else %}Add New Task{% endif %}</h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <div class="card">
+        <div class="card add-task-card">
             <div class="card-body">
                 <h5 class="card-title">Task Information</h5>
                 {{ task_form.as_p }}
-                
+
                 <h5 class="card-title mt-4">Task Details</h5>
                 {{ detail_form.as_p }}
 
                 <h5 class="card-title mt-4">Attachments</h5>
-                <div class="mb-3">
+                <div class="file-input-wrapper">
                     <input type="file" name="attachments" class="form-control" multiple>
+                    <span class="file-hint">You can attach multiple files (images, pdf, docs). Max size depends on server settings.</span>
                 </div>
-                
-                <button type="submit" class="btn btn-primary mt-3">{% if edit_mode %}Update Task{% else %}Add Task{% endif %}</button>
+
+                <div class="btn-action-group">
+                    <button type="submit" class="btn btn-primary">{% if edit_mode %}Update Task{% else %}Add Task{% endif %}</button>
+                </div>
             </div>
         </div>
     </form>
@@ -27,7 +35,8 @@
         <h5>Existing attachments</h5>
         <ul>
             {% for a in task.attachments.all %}
-            <li><a href="{{ a.file.url }}">{{ a.file.name }}</a></li>
+            <li class="attachments-list-item"><span class="attachment-name">{{ a.file.name }}</span>
+                <span class="attachment-actions"><a href="{{ a.file.url }}" target="_blank">View</a></span></li>
             {% endfor %}
         </ul>
     </div>

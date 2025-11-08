@@ -1,0 +1,126 @@
+/* Styles specific to the "Add / Edit Task" page */
+
+.add-task-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.add-task-card {
+  padding: 1.25rem;
+  background: linear-gradient(180deg, #ffffff, #fbfdff);
+  border-radius: 12px;
+  border: 1px solid rgba(74,144,226,0.08);
+}
+
+.add-task-card .card-title {
+  font-weight: 700;
+  color: #23395d;
+}
+
+.add-task-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .add-task-row {
+    grid-template-columns: 1fr 320px;
+  }
+}
+
+.form-label {
+  font-weight: 600;
+  color: #4a5870;
+}
+
+.input-focus {
+  box-shadow: 0 0 0 0.2rem rgba(74,144,226,0.12);
+  border-color: #4a90e2;
+}
+
+/* file input styling */
+.file-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+
+.file-input-wrapper input[type="file"] {
+  border: 1px dashed rgba(34,57,93,0.12);
+  padding: .5rem;
+  border-radius: 8px;
+  background-color: #ffffff;
+}
+
+.file-hint {
+  font-size: .9rem;
+  color: #6b7788;
+}
+
+.attachments-list {
+  margin-top: .75rem;
+  background: #f8fbff;
+  padding: .75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(74,144,226,0.04);
+}
+
+.attachments-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .45rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.03);
+}
+
+.attachments-list li:last-child { border-bottom: none; }
+
+.attachment-name {
+  color: #2b3a55;
+  font-weight: 500;
+}
+
+.attachment-actions a {
+  color: #4a90e2;
+  margin-left: .5rem;
+}
+
+.btn-action-group {
+  display: flex;
+  gap: .5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+/* subtle helper styles */
+.field-help {
+  display: block;
+  font-size: .85rem;
+  color: #748095;
+  margin-top: .25rem;
+}
+
+/* small visual tweak to standard .btn-primary inside this page */
+.add-task-card .btn-primary {
+  padding: 10px 22px;
+  border-radius: 24px;
+}
+
+/* focus states for inputs inside this page */
+.add-task-card input:focus, .add-task-card textarea:focus, .add-task-card select:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.15rem rgba(74,144,226,0.12);
+  border-color: #4a90e2;
+}
+
+/* small note for edit mode */
+.edit-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  background: rgba(74,144,226,0.08);
+  color: #15417b;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: .85rem;
+}
